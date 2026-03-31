@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanishka Singh | Portfolio</title>
+  <meta name="description" content="Portfolio website for Kanishka Singh - MS Computer Science student, ML engineer, and software builder." />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #121933;
+      --card: rgba(18, 25, 51, 0.82);
+      --text: #eef2ff;
+      --muted: #b8c1ec;
+      --accent: #7c9cff;
+      --accent-2: #8ef0d1;
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      --max-width: 1150px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124, 156, 255, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(142, 240, 209, 0.16), transparent 22%),
+        linear-gradient(180deg, #090d1a 0%, #0b1020 45%, #0f1730 100%);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(var(--max-width), calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      background: rgba(8, 12, 25, 0.68);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0;
+      gap: 1rem;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      font-size: 1rem;
+    }
+
+    .brand span {
+      color: var(--accent-2);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .hero {
+      padding: 5rem 0 3rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.85rem;
+      border: 1px solid rgba(124, 156, 255, 0.28);
+      background: rgba(124, 156, 255, 0.1);
+      border-radius: 999px;
+      color: #dbe4ff;
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    h1 {
+      font-size: clamp(2.6rem, 5vw, 4.8rem);
+      line-height: 1.05;
+      margin-bottom: 1rem;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #ffffff 0%, #b8c7ff 48%, #8ef0d1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.08rem;
+      max-width: 62ch;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.95rem 1.25rem;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      font-weight: 700;
+      transition: 0.25s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #5b7cff);
+      color: white;
+      box-shadow: 0 14px 30px rgba(91, 124, 255, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      border-color: var(--border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .hero-card,
+    .section-card,
+    .skill-card,
+    .timeline-item,
+    .project-card,
+    .achievement-card,
+    .contact-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 1.5rem;
+    }
+
+    .profile-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .profile-image {
+      width: min(100%, 320px);
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .profile-caption {
+      text-align: center;
+    }
+
+    .profile-caption h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .profile-caption p {
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .stat-list {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .stat {
+      padding: 1rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stat h3 {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+    }
+
+    .stat p {
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    section {
+      padding: 1.2rem 0 0;
+    }
+
+    .section-header {
+      margin-bottom: 1.2rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      margin-bottom: 0.4rem;
+    }
+
+    .section-header p {
+      color: var(--muted);
+      max-width: 60ch;
+    }
+
+    .section-card {
+      padding: 1.5rem;
+    }
+
+    .about-grid,
+    .skills-grid,
+    .projects-grid,
+    .achievements-grid,
+    .contact-grid,
+    .education-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .about-grid,
+    .education-grid,
+    .contact-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .skills-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .projects-grid,
+    .achievements-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .label {
+      color: var(--accent-2);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .timeline-item {
+      padding: 1.35rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    }
+
+    .timeline-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.55rem;
+    }
+
+    .timeline-top h3 {
+      font-size: 1.15rem;
+    }
+
+    .timeline-meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    ul {
+      padding-left: 1.15rem;
+    }
+
+    li + li {
+      margin-top: 0.5rem;
+    }
+
+    .skill-card,
+    .project-card,
+    .achievement-card,
+    .contact-card {
+      padding: 1.25rem;
+    }
+
+    .skill-card h3,
+    .project-card h3,
+    .achievement-card h3,
+    .contact-card h3 {
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .tag {
+      font-size: 0.86rem;
+      padding: 0.42rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(124, 156, 255, 0.12);
+      border: 1px solid rgba(124, 156, 255, 0.18);
+      color: #dbe4ff;
+    }
+
+    .contact-link {
+      display: block;
+      color: var(--muted);
+      word-break: break-word;
+    }
+
+    .contact-link:hover {
+      color: var(--text);
+    }
+
+    footer {
+      padding: 3rem 0 2rem;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 960px) {
+      .hero-grid,
+      .about-grid,
+      .education-grid,
+      .skills-grid,
+      .projects-grid,
+      .achievements-grid,
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding-top: 3.5rem;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#home" class="brand">Kanishka<span>.</span></a>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#education">Education</a>
+        <a href="#experience">Experience</a>
+        <a href="#research">Research</a>
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">Machine Learning · GenAI · Software Engineering</div>
+          <h1>
+            Hi, I’m <span class="gradient-text">Kanishka Singh</span>
+          </h1>
+          <p>
+            M.S. Computer Science student at NYU Courant building machine learning systems, GenAI products,
+            and scalable backend solutions. I enjoy turning complex business and research problems into practical,
+            user-focused tools.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#contact">Let’s Connect</a>
+            <a class="btn btn-secondary" href="mailto:kanishka.singh33@gmail.com">Email Me</a>
+          </div>
+        </div>
+
+        <aside class="hero-card">
+          <div class="profile-wrap">
+            <img class="profile-image" src="profile.jpg" alt="Portrait of Kanishka Singh" />
+            <div class="profile-caption">
+              <h3>Kanishka Singh</h3>
+              <p>ML Engineer · GenAI Builder · Software Developer</p>
+            </div>
+          </div>
+          <div class="stat-list">
+            <div class="stat">
+              <h3>Current Role</h3>
+              <p>M.S. in Computer Science, NYU Courant</p>
+            </div>
+            <div class="stat">
+              <h3>Core Focus</h3>
+              <p>ML, Generative AI, LLM systems, backend engineering</p>
+            </div>
+            <div class="stat">
+              <h3>Industry</h3>
+              <p>Ernst &amp; Young — Data Science &amp; Analytics / Senior Analyst</p>
+            </div>
+            <div class="stat">
+              <h3>Location</h3>
+              <p>New York, USA</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="container">
+        <div class="section-header">
+          <h2>About Me</h2>
+          <p>
+            I combine analytics, machine learning, and product thinking to build systems that are both technically
+            strong and business-relevant.
+          </p>
+        </div>
+        <div class="section-card about-grid">
+          <div>
+            <span class="label">Profile</span>
+            <p class="muted">
+              I have worked across machine learning, GenAI applications, analytics engineering, and full-stack
+              product development. My experience spans enterprise KPI discovery, RAG-based assistants,
+              predictive modeling, and scalable dashboards.
+            </p>
+          </div>
+          <div>
+            <span class="label">What I Like Building</span>
+            <p class="muted">
+              Intelligent products powered by LLMs, recommendation and forecasting systems, backend-heavy web
+              applications, and decision-support tools that create real impact for users and teams.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="education">
+      <div class="container">
+        <div class="section-header">
+          <h2>Education</h2>
+          <p>Academic foundation in computer science, machine learning, and applied analytics.</p>
+        </div>
+        <div class="education-grid">
+          <article class="section-card">
+            <span class="label">2025 – Present</span>
+            <h3>New York University — Courant Institute of Mathematical Sciences</h3>
+            <p class="muted"><strong>M.S. in Computer Science</strong> · New York, USA</p>
+            <p class="muted">Relevant coursework: Machine Learning, Vision Meets ML, Predictive Analytics</p>
+          </article>
+          <article class="section-card">
+            <span class="label">2020 – 2024</span>
+            <h3>Kalinga Institute of Industrial Technology</h3>
+            <p class="muted"><strong>B.Tech. in Computer Science &amp; Engineering</strong> · Bhubaneswar, India</p>
+            <p class="muted">GPA: 9.04 / 10.0</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="container">
+        <div class="section-header">
+          <h2>Industry Experience</h2>
+          <p>Building ML systems, analytics workflows, and enterprise-facing GenAI products.</p>
+        </div>
+        <div class="timeline">
+          <article class="timeline-item">
+            <div class="timeline-top">
+              <div>
+                <h3>Senior Analyst · Ernst &amp; Young</h3>
+                <p class="timeline-meta">Jul 2024 – Apr 2025</p>
+              </div>
+            </div>
+            <ul class="muted">
+              <li>Engineered a Stock-Out Prediction Engine using feature analysis and ML models including Logistic Regression, Decision Trees, and Gradient Boosting, reaching 85% accuracy on unseen inventory data.</li>
+              <li>Built GenAI-powered chatbots for FMCG clients using LangChain, LLM APIs, and RAG to surface CXO-level business insights and reduce decision-making turnaround time.</li>
+              <li>Improved conversational continuity and contextual understanding by implementing LangChain memory modules and few-shot prompting strategies.</li>
+            </ul>
+          </article>
+
+          <article class="timeline-item">
+            <div class="timeline-top">
+              <div>
+                <h3>Data Science &amp; Analytics Intern · Ernst &amp; Young</h3>
+                <p class="timeline-meta">Jun 2023 – Jul 2024</p>
+              </div>
+            </div>
+            <ul class="muted">
+              <li>Developed “Dashboard Genie,” a GenAI-powered KPI discovery assistant using embeddings, vector search, and LangChain to help managers find relevant KPIs faster.</li>
+              <li>Served as Technical Lead for an EV dashboard POC, re-architecting the backend, implementing ETL pipelines, optimizing SQL views, and delivering interactive dashboards.</li>
+              <li>Designed and automated a Pareto Analysis dashboard with Python and SQL, significantly reducing manual analytical effort.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="research">
+      <div class="container">
+        <div class="section-header">
+          <h2>Research Experience</h2>
+          <p>Applied machine learning research focused on robust forecasting under real-world volatility.</p>
+        </div>
+        <article class="section-card">
+          <span class="label">Sept 2025 – Dec 2025</span>
+          <h3>Sentiment-Aware Bitcoin Volatility Forecasting with Residual Decomposition Networks</h3>
+          <p class="muted">Prof. Anasse Bari · New York University — Courant Institute of Mathematical Sciences</p>
+          <ul class="muted" style="margin-top: 1rem;">
+            <li>Developed an N-BEATS-based volatility forecasting model with a task-aware hybrid loss, achieving a validation MAE of 0.2897 and outperforming multiple deep learning baselines.</li>
+            <li>Designed a hybrid loss combining robust error penalization, jump sensitivity, and long-term trend alignment for improved generalization under heavy-tailed, regime-shifting data.</li>
+            <li>Demonstrated strong performance across both smooth volatility regimes and abrupt spike events on held-out data.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="container">
+        <div class="section-header">
+          <h2>Projects</h2>
+          <p>Selected software and systems work.</p>
+        </div>
+        <div class="projects-grid">
+          <article class="project-card">
+            <h3>Project Scheduling Monitor</h3>
+            <p class="muted">
+              Built a project scheduling and monitoring web application to manage timelines, budgets, and team
+              workflows, with backend services and REST APIs designed for an Agile development environment.
+            </p>
+            <div class="tags">
+              <span class="tag">JavaScript</span>
+              <span class="tag">Node.js</span>
+              <span class="tag">MongoDB</span>
+              <span class="tag">REST APIs</span>
+            </div>
+          </article>
+
+          <article class="project-card">
+            <h3>Enterprise AI &amp; Analytics Systems</h3>
+            <p class="muted">
+              Across EY engagements, contributed to GenAI assistants, backend-heavy dashboard systems, KPI
+              discovery workflows, and predictive analytics solutions serving real business users.
+            </p>
+            <div class="tags">
+              <span class="tag">LLMs</span>
+              <span class="tag">LangChain</span>
+              <span class="tag">Python</span>
+              <span class="tag">SQL</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="container">
+        <div class="section-header">
+          <h2>Skills</h2>
+          <p>Tools, frameworks, and areas I work with most often.</p>
+        </div>
+        <div class="skills-grid">
+          <article class="skill-card">
+            <h3>Languages</h3>
+            <p class="muted">Python, JavaScript, TypeScript, Java, C/C++, SQL, R, HTML, CSS</p>
+          </article>
+          <article class="skill-card">
+            <h3>ML / AI Frameworks</h3>
+            <p class="muted">PyTorch, TensorFlow, LangChain, Scikit-learn, Matplotlib, PySpark, MATLAB, OpenCV</p>
+          </article>
+          <article class="skill-card">
+            <h3>Technical Strengths</h3>
+            <p class="muted">Machine Learning, Generative AI, LLMs, Software Engineering, Backend Development, System Design, REST APIs, Scalable Systems</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="achievements">
+      <div class="container">
+        <div class="section-header">
+          <h2>Achievements</h2>
+          <p>Recognition earned through ownership, delivery, and impact.</p>
+        </div>
+        <div class="achievements-grid">
+          <article class="achievement-card">
+            <h3>Emerging Extraordinaire</h3>
+            <p class="muted">Awarded at Ernst &amp; Young for excellence and ownership during the internship.</p>
+          </article>
+          <article class="achievement-card">
+            <h3>Client MD Recognition</h3>
+            <p class="muted">Received a “Pat on the Back” for delivering a scalable, precise, and user-focused POC that outperformed a leading consulting firm.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="container">
+        <div class="section-header">
+          <h2>Contact</h2>
+          <p>Open to internships, collaborations, and interesting product or research conversations.</p>
+        </div>
+        <div class="contact-grid">
+          <article class="contact-card">
+            <h3>Email</h3>
+            <a class="contact-link" href="mailto:kanishka.singh33@gmail.com">kanishka.singh33@gmail.com</a>
+          </article>
+          <article class="contact-card">
+            <h3>Phone</h3>
+            <a class="contact-link" href="tel:+16467816532">+1 (646) 781-6532</a>
+          </article>
+          <article class="contact-card">
+            <h3>LinkedIn</h3>
+            <a class="contact-link" href="https://www.linkedin.com/in/singh-kanishka/" target="_blank" rel="noreferrer">linkedin.com/in/singh-kanishka</a>
+          </article>
+          <article class="contact-card">
+            <h3>GitHub</h3>
+            <a class="contact-link" href="https://github.com/up-the-ladder" target="_blank" rel="noreferrer">github.com/up-the-ladder</a>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 Kanishka Singh. Built with HTML and CSS for GitHub Pages.</p>
+    </div>
+  </footer>
+</body>
+</html>
