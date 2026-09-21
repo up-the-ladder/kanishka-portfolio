@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multimodal Video Search &amp; Ranking Engine · Kanishka Singh</title>
+<meta name="description" content="A retrieval system for searching inside videos with natural language: Whisper transcripts, OpenCLIP frames, OCR text and BLIP captions, retrieved with BM25 and FAISS and reranked with cross-encoders.">
+<link rel="canonical" href="https://up-the-ladder.github.io/kanishka-portfolio/projects/multimodal-video-search.html">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../styles/main.css">
+<script src="../scripts/theme.js"></script>
+<meta property="og:type" content="article">
+<meta property="og:title" content="Multimodal Video Search &amp; Ranking Engine">
+<meta property="og:description" content="Searching inside video with natural language: four indexed modalities, sparse and dense retrieval, fusion, and cross-encoder reranking, with each stage justified by controlled evaluation.">
+<meta property="og:url" content="https://up-the-ladder.github.io/kanishka-portfolio/projects/multimodal-video-search.html">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="topbar">
+  <button type="button" class="themetoggle" data-theme-toggle aria-label="Switch to dark theme">Dark</button>
+</div>
+
+<a class="backlink" href="../index.html">← Kanishka Singh</a>
+
+<header class="article-header">
+  <h1 class="article-title">Multimodal Video Search &amp; Ranking Engine</h1>
+  <p class="article-sub">Natural-language search inside video · <span class="tag">In development</span></p>
+  <p class="stack">Python · PyTorch · Whisper · OpenCLIP · BLIP · FAISS · BM25 · cross-encoders · FastAPI · Redis · PostgreSQL · Docker</p>
+</header>
+
+<div class="glance">
+  <h2>At a glance</h2>
+  <ul>
+    <li>Answers queries like &ldquo;the part where they explain the loss function&rdquo; by returning the video segment, not the video.</li>
+    <li>Each segment is indexed four ways: spoken transcript, visual frame content, on-screen text, and a generated caption.</li>
+    <li>Retrieval is two-stage: sparse BM25 and dense FAISS candidates, fused, then optionally reranked by a cross-encoder.</li>
+    <li>Every stage is defended by an ablation: transcript-only, visual, sparse, dense, hybrid, and reranked systems are compared on the same queries.</li>
+    <li>Evaluation uses Recall@K, MRR, NDCG, and latency, so quality gains are weighed against what they cost.</li>
+  </ul>
+</div>
+
+<main id="main" class="article-body">
+
+  <h2>Problem</h2>
+  <p>Video search usually operates on titles, descriptions, and tags, which is metadata written by a
+  human about a whole file. What people actually want is the moment: a specific segment where something is
+  said, shown, or written on screen. That requires searching the content itself, and the content is
+  not one signal but several, each of which fails in different ways.</p>
+
+  <h2>Motivation</h2>
+  <p>Transcripts alone miss anything demonstrated rather than narrated. Frame embeddings alone miss
+  precise terminology. On-screen text carries slide titles, code, and labels that nobody says out
+  loud. Combining them is the obvious move, which is exactly why it needs to be measured rather than
+  assumed. More modalities means more index cost and more latency, and the payoff has to be real.</p>
+
+  <h2>Indexing pipeline</h2>
+  <p>Videos are segmented, and each segment is represented across four modalities:</p>
+  <ul>
+    <li><strong>Spoken transcript.</strong> Whisper, giving searchable text aligned to time.</li>
+    <li><strong>Visual frames.</strong> OpenCLIP embeddings, giving a shared space for text queries and images.</li>
+    <li><strong>On-screen text.</strong> OCR, recovering slide, caption, and interface text.</li>
+    <li><strong>Generated captions.</strong> BLIP, describing what a frame shows when nobody says it.</li>
+  </ul>
+  <p>The output is a segment-level index where a single moment is reachable through whichever signal
+  happens to carry the answer.</p>
+
+  <h2>Retrieval and ranking</h2>
+  <p class="callout">Query → sparse (BM25) and dense (FAISS) candidate retrieval → multimodal fusion →
+  optional cross-encoder reranking → ranked segments.</p>
+  <p>The first stage is cheap and recall-oriented: BM25 handles exact terms, names, and jargon, while
+  FAISS handles paraphrase and semantic overlap. Their candidates are fused across modalities. The
+  second stage is expensive and precision-oriented: a cross-encoder scores query and segment together
+  and reorders the shortlist. Splitting the two is what keeps the system serviceable, because the model
+  that is good enough to rank well is far too slow to run over the whole corpus.</p>
+
+  <h2>How the architecture is justified</h2>
+  <p>The project treats &ldquo;add another model&rdquo; as a claim that has to be tested. Six system
+  variants (transcript-only, visual, sparse, dense, hybrid, and reranked) are compared under a
+  controlled retrieval evaluation, so each component earns its place by improving results on the same
+  queries rather than by being present in the diagram.</p>
+  <p>Metrics are Recall@K (did the right segment survive the first stage), MRR and NDCG (is it near
+  the top after ranking), and latency (what the quality cost). Reranking in particular only makes
+  sense if the NDCG it buys is worth the milliseconds it spends, which is why latency is measured
+  alongside quality rather than reported separately.</p>
+
+  <h2>Engineering decisions</h2>
+  <p><strong>Segment-level indexing rather than video-level.</strong> The unit of retrieval should be
+  the unit the user wants. Indexing whole videos makes the ranking problem easier and the product
+  worse.</p>
+  <p><strong>Sparse and dense together rather than choosing one.</strong> They fail on opposite query
+  types. Keeping both, and fusing, avoids optimizing for whichever query set was tested first.</p>
+  <p><strong>Cross-encoder reranking as an optional stage.</strong> Making it toggleable is what makes
+  the ablation possible and keeps a cheaper configuration available.</p>
+  <p><strong>Latency treated as a first-class metric.</strong> A retrieval system that is only
+  evaluated on NDCG will happily become unusable.</p>
+
+  <h2>Tradeoffs</h2>
+  <ul>
+    <li>Four modalities give better coverage but multiply indexing cost and storage per hour of video.</li>
+    <li>Cross-encoder reranking improves precision but adds per-query latency, which is why it stays optional.</li>
+    <li>Fine-grained segments improve precision but enlarge the index and can fragment context that spans a boundary.</li>
+    <li>Generated captions add signal but introduce model-authored text into the index, which can mislead as well as help.</li>
+  </ul>
+
+  <h2>What&rsquo;s next</h2>
+  <ul>
+    <li>Publish the ablation table so the component-by-component gains are visible rather than described.</li>
+    <li>Report latency per stage, not just end to end.</li>
+    <li>Error analysis on the queries the hybrid system still loses.</li>
+  </ul>
+
+  <h2>Resources</h2>
+  <ul class="links">
+    <li><a href="https://github.com/up-the-ladder/Multimodal-Video-Search-Ranking-Engine" rel="noopener">GitHub repository</a></li>
+    <li><a href="../index.html">Back to homepage</a></li>
+  </ul>
+
+</main>
+
+</body>
+</html>

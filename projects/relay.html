@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay: distributed job execution platform · Kanishka Singh</title>
+<meta name="description" content="Relay is a distributed job execution platform in Go: gRPC submission, PostgreSQL-backed durable job state, concurrency-safe claiming, leases, heartbeats, retries, and idempotent recovery.">
+<link rel="canonical" href="https://up-the-ladder.github.io/kanishka-portfolio/projects/relay.html">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../styles/main.css">
+<script src="../scripts/theme.js"></script>
+<meta property="og:type" content="article">
+<meta property="og:title" content="Relay: distributed job execution platform">
+<meta property="og:description" content="A Go job platform designed around failure as a normal operating condition: leases, heartbeats, idempotent retries, and transactional job ownership in PostgreSQL.">
+<meta property="og:url" content="https://up-the-ladder.github.io/kanishka-portfolio/projects/relay.html">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="topbar">
+  <button type="button" class="themetoggle" data-theme-toggle aria-label="Switch to dark theme">Dark</button>
+</div>
+
+<a class="backlink" href="../index.html">← Kanishka Singh</a>
+
+<header class="article-header">
+  <h1 class="article-title">Relay</h1>
+  <p class="article-sub">Distributed job execution platform in Go · <span class="tag">In development</span></p>
+  <p class="stack">Go · gRPC · PostgreSQL · Redis · Docker · Kubernetes</p>
+</header>
+
+<div class="glance">
+  <h2>At a glance</h2>
+  <ul>
+    <li>Runs asynchronous jobs across many concurrent workers without losing or double-executing work.</li>
+    <li>PostgreSQL is the single source of truth for job state; claiming is transactional, so two workers cannot own the same job.</li>
+    <li>Recovery is built in: leases expire, heartbeats detect dead workers, and retries are idempotent with exponential backoff.</li>
+    <li>Redis and Kubernetes are only introduced where they solve a demonstrated need, not by default.</li>
+    <li>Failure testing, load testing, observability, and reproducible benchmarks are the next milestone. Performance numbers are not claimed until they are measured.</li>
+  </ul>
+</div>
+
+<main id="main" class="article-body">
+
+  <h2>Problem</h2>
+  <p>A service that needs to hand off work, whether that is encoding a file, running a pipeline, or
+  sending a batch, has to answer awkward questions the moment more than one worker exists. Which worker owns this job? What
+  happens if that worker dies halfway through? If the job is retried, does the side effect happen
+  twice? Relay exists to work through those questions directly rather than delegating them to a
+  managed queue.</p>
+
+  <h2>Motivation</h2>
+  <p>Most of the difficulty in a job system is not scheduling; it is ownership and recovery. Building
+  it from the database upward makes the hard parts visible: transactional claiming, lease expiry,
+  detection of a worker that stopped without saying so, and recovery paths that are safe to run more
+  than once.</p>
+
+  <h2>Constraints</h2>
+  <ul>
+    <li>Failure is assumed, not exceptional. A worker may crash, stall, or be partitioned at any point in a job&rsquo;s lifetime.</li>
+    <li>No job may be executed by two workers concurrently, and no job may be silently abandoned.</li>
+    <li>Retries must be safe, which means execution has to be idempotent.</li>
+    <li>The system must be reproducible locally, so a reviewer can run it rather than take the design on trust.</li>
+    <li>Infrastructure is added only when a specific problem justifies it.</li>
+  </ul>
+
+  <h2>Architecture</h2>
+  <p>Clients submit jobs over gRPC, which gives a typed contract between submitters and the platform.
+  Submitted jobs land in PostgreSQL, which holds durable job state and acts as the coordination point
+  for the whole system. Workers claim jobs from PostgreSQL under a transaction, so claiming is
+  concurrency-safe by construction rather than by convention, and each claim carries a lease.</p>
+  <p class="callout">Client → gRPC → job record in PostgreSQL → transactional claim by a worker → lease
+  held and refreshed by heartbeat → completion, retry with backoff, or lease expiry and re-claim.</p>
+  <p>Workers heartbeat while they hold a lease. A lease that stops being refreshed is the signal that
+  the owning worker is gone, which lets the job be returned to the pool and picked up again without an
+  external coordinator making that decision.</p>
+
+  <h2>Failure model</h2>
+  <ul>
+    <li><strong>Worker dies mid-job.</strong> Its lease expires; the job becomes claimable again.</li>
+    <li><strong>Worker stalls.</strong> Heartbeats stop, which is treated the same way as a death.</li>
+    <li><strong>Two workers race for the same job.</strong> Transactional claiming means exactly one wins.</li>
+    <li><strong>Job fails.</strong> It is retried with exponential backoff rather than immediately, to avoid hammering a failing dependency.</li>
+    <li><strong>Job is retried after partial execution.</strong> Idempotency keeps the re-run safe.</li>
+    <li><strong>Process is asked to shut down.</strong> Graceful shutdown releases or completes in-flight work rather than dropping it.</li>
+  </ul>
+
+  <h2>Engineering decisions</h2>
+  <p><strong>PostgreSQL as the coordination layer rather than a queue broker.</strong> Job state needs
+  to be durable and queryable, and transactional claiming gives mutual exclusion with the same
+  mechanism that gives durability. One system, one source of truth.</p>
+  <p><strong>Leases plus heartbeats rather than timeouts alone.</strong> A fixed timeout either kills
+  legitimate long jobs or leaves dead ones stuck. A refreshed lease lets a long job stay owned while
+  still expiring quickly when the owner disappears.</p>
+  <p><strong>Idempotency before retries.</strong> Retry logic is only safe if re-execution is safe, so
+  idempotency is a property of the execution path rather than a guard bolted on afterwards.</p>
+  <p><strong>Redis and Kubernetes kept out of the critical path by default.</strong> Both are available,
+  but the system is designed so they are introduced where they solve a demonstrated need, not so the
+  stack looks larger. Docker covers reproducible local deployment.</p>
+
+  <h2>Evaluation</h2>
+  <p>The measurement work is the next milestone rather than a finished result: failure testing
+  (killing workers mid-job and asserting recovery), load testing, observability, and reproducible
+  performance benchmarks. Throughput and latency figures belong here once they come from a benchmark
+  someone else can re-run, so they are not claimed yet.</p>
+
+  <h2>Tradeoffs</h2>
+  <ul>
+    <li>Coordinating through PostgreSQL keeps the design simple and consistent, but puts claim throughput on the database rather than on a purpose-built broker.</li>
+    <li>Short leases recover from failures faster but add heartbeat traffic; long leases do the opposite.</li>
+    <li>Requiring idempotent execution pushes work onto job authors in exchange for safe retries.</li>
+    <li>Deferring Redis and Kubernetes keeps the system understandable, at the cost of not yet demonstrating behaviour at scale.</li>
+  </ul>
+
+  <h2>What&rsquo;s next</h2>
+  <ul>
+    <li>Fault-injection suite: kill workers at each lifecycle stage and assert no job is lost or duplicated.</li>
+    <li>Load tests with reproducible scripts and published numbers.</li>
+    <li>Metrics and tracing across submission, claim, execution, and retry.</li>
+  </ul>
+
+  <h2>Resources</h2>
+  <ul class="links">
+    <li><a href="https://github.com/up-the-ladder/Relay" rel="noopener">GitHub repository</a></li>
+    <li><a href="../index.html">Back to homepage</a></li>
+  </ul>
+
+</main>
+
+</body>
+</html>
