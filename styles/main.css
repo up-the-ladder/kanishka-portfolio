@@ -113,7 +113,7 @@ a:focus-visible {
 
 .intro {
   display: grid;
-  grid-template-columns: 1fr 9rem;
+  grid-template-columns: 1fr 12.5rem;
   gap: var(--col-gap);
   align-items: start;
   margin-bottom: 3rem;
@@ -138,15 +138,13 @@ a:focus-visible {
 
 .intro p { max-width: 38rem; }
 
-.portrait { margin: 0; }
+.portrait { margin: 5.1rem 0 0; }  /* top edge lines up with the first line of the intro */
 .portrait img {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  height: auto;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-  filter: saturate(0.96);
 }
 
 /* --- link cluster -------------------------------------------------------- */
@@ -419,7 +417,7 @@ a:focus-visible {
     gap: 1.25rem;
     margin-bottom: 2.25rem;
   }
-  .portrait { order: -1; width: 6.25rem; }
+  .portrait { order: -1; width: 7.5rem; margin-top: 0; }
   .name { font-size: 1.45rem; }
 
   .section {
